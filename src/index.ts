@@ -11,6 +11,7 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { RestServerTransport } from "@chatmcp/sdk/server/rest.js";
 import {
   CallToolRequestSchema,
   ListResourcesRequestSchema,
@@ -20,6 +21,7 @@ import {
   GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { HeyBeautyClient } from "./heybeauty.js";
+import { getParamValue, getAuthValue } from "@chatmcp/sdk/utils/index.js";
 
 /**
  * Create an MCP server with capabilities for resources (to list/read clothes),
@@ -39,10 +41,11 @@ const server = new Server(
   }
 );
 
-const apiKey = process.env.HEYBEAUTY_API_KEY || "";
-if (!apiKey) {
-  throw new Error("HEYBEAUTY_API_KEY is not set");
-}
+const heybeautyApiKey = getParamValue("HEYBEAUTY_API_KEY") || "";
+
+const mode = getParamValue("mode") || "stdio";
+const port = getParamValue("port") || 9593;
+const endpoint = getParamValue("endpoint") || "/rest";
 
 /**
  * Handler for listing available clothes as resources.
@@ -51,8 +54,14 @@ if (!apiKey) {
  * - Plain text MIME type
  * - Human readable name and description (now including the cloth title)
  */
-server.setRequestHandler(ListResourcesRequestSchema, async () => {
+server.setRequestHandler(ListResourcesRequestSchema, async (request) => {
   try {
+    const apiKey =
+      getAuthValue(request, "HEYBEAUTY_API_KEY") || heybeautyApiKey;
+    if (!apiKey) {
+      throw new Error("HEYBEAUTY_API_KEY is not set");
+    }
+
     const client = new HeyBeautyClient({ apiKey });
     const clothes = await client.getClothes();
 
@@ -75,6 +84,12 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
  */
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   try {
+    const apiKey =
+      getAuthValue(request, "HEYBEAUTY_API_KEY") || heybeautyApiKey;
+    if (!apiKey) {
+      throw new Error("HEYBEAUTY_API_KEY is not set");
+    }
+
     const url = new URL(request.params.uri);
     const id = url.pathname.replace(/^\//, "");
 
@@ -161,6 +176,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
  */
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
+    const apiKey =
+      getAuthValue(request, "HEYBEAUTY_API_KEY") || heybeautyApiKey;
+    if (!apiKey) {
+      throw new Error("HEYBEAUTY_API_KEY is not set");
+    }
+
     const client = new HeyBeautyClient({ apiKey });
 
     switch (request.params.name) {
@@ -299,6 +320,18 @@ Here is the user's photo URL and either their clothing image URL or the selected
  * This allows the server to communicate via standard input/output streams.
  */
 async function main() {
+  if (mode === "rest") {
+    const transport = new RestServerTransport({
+      port,
+      endpoint,
+    });
+    await server.connect(transport);
+
+    await transport.startServer();
+
+    return;
+  }
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

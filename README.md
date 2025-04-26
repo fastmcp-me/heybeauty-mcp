@@ -8,7 +8,25 @@ This is a TypeScript-based MCP server that implements virtual tryon using HeyBea
 - Tools for submit tryon task and query task info.
 - Prompts for tryon cloth.
 
-## Features
+## Quick Start
+
+1. apply for [HeyBeauty API Key](https://heybeauty.com/docs/api/introduction)
+
+2. add the server config to MCP Client config file
+
+```json
+{
+  "mcpServers": {
+    "heybeauty-mcp": {
+      "command": "npx",
+      "args": ["-y", "heybeauty-mcp"],
+      "env": {
+        "HEYBEAUTY_API_KEY": "your_heybeauty_api_key"
+      }
+    }
+  }
+}
+```
 
 ### Resources
 
