@@ -10,7 +10,7 @@ This is a TypeScript-based MCP server that implements virtual tryon using HeyBea
 
 ## Quick Start
 
-1. apply for [HeyBeauty API Key](https://heybeauty.com/docs/api/introduction)
+1. apply for [HeyBeauty API Key](https://doc.heybeauty.ai/try-on)
 
 2. add the server config to MCP Client config file
 
@@ -95,7 +95,7 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 }
 ```
 
-Follow this document to [get HeyBeauty API Key](https://heybeauty.com/docs/api/introduction).
+Follow this document to [get HeyBeauty API Key](https://doc.heybeauty.ai/try-on).
 
 ### Debugging
 
